@@ -1,27 +1,64 @@
 import numpy as np
 import cv2
 
-captura_color = cv2.imread('./capturas/capturas_0.jpg')
+def nothing(x):
+    pass
+
+captura_color = cv2.imread('./capturas/capturas_1.jpg')
 resized_captura_color = cv2.resize(captura_color, (captura_color.shape[1]/2, captura_color.shape[0]/2))
 
-captura = cv2.cvtColor(resized_captura_color, cv2.COLOR_BGR2GRAY)
+cv2.namedWindow("normal")
+cv2.createTrackbar("Threshold value", "normal", 30, 255, nothing)
+cv2.createTrackbar("Max", "normal", 100, 225, nothing)
 
-# resized_captura = cv2.resize(captura, (captura.shape[1]/2, captura.shape[0]/2))
+captura_gray = cv2.cvtColor(resized_captura_color, cv2.COLOR_BGR2GRAY)
 
-blur = cv2.GaussianBlur(captura, (3, 3), 1)
-t, dst = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_TRIANGLE)
 
-(_,contours,_) = cv2.findContours(dst, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-# for c in contours:
-#     area = cv2.contourArea(c)
-#     if area < 10000:
-print (contours[0])
-# cv2.drawContours(resized_captura_color, contours[2], 0, (0, 255, 0), 2, cv2.LINE_AA)
+# imagen, contornos, jerarquia = cv2.findContours(dst.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
-cv2.imshow("Captura", resized_captura_color)
+# i=0
+while True:
 
-# template = cv2.imread('./templates/0.png', 0)
-# gauss_template = cv2.GaussianBlur(template, (3,3), 0)
 
-cv2.waitKey()
+    value_threshold = cv2.getTrackbarPos("Threshold value", "normal")
+    max = cv2.getTrackbarPos("Max", "normal")
+
+    t, dst = cv2.threshold(captura_gray, value_threshold, 255, cv2.THRESH_BINARY_INV)
+    canny = cv2.Canny(captura_gray, value_threshold, max)
+
+    # imagen, contornos, jerarquia = cv2.findContours(canny.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+    (_, contornos,_) = cv2.findContours(canny.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Mostramos el numero de monedas por consola
+    print("He encontrado {} objetos".format(len(contornos)))
+
+    # cv2.drawContours(resized_captura_color,contornos,-1,(0,0,255), 2)
+    # cv2.imshow("contornos", original)
+
+    i = 0
+    for contorno in contornos:
+        if cv2.contourArea(contorno) > 100 and cv2.contourArea(contorno) < 1500:
+            approx = cv2.approxPolyDP(contorno,0.06*cv2.arcLength(contorno,True),True)
+            if len(approx)==4:
+                print(2)
+                (x,y,w,h) = cv2.boundingRect(contorno)
+                cv2.rectangle(resized_captura_color, (x,y), (x+w, y+h), (0, 255, 0), 3 )
+        # (x, y, w, h) = cv2.boundingRect(contorno)
+        #     cv2.rectangle(resized_captura_color, (x, y), (x+w, y+h), (0,255,0), 3)
+        # cv2.putText(resized_captura_color, str(i), (x - 10, y - 10),
+        #     cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 255, 0), 2)
+        # i = i + 1;
+
+    cv2.imshow("threshold", dst)
+    cv2.imshow("normal", resized_captura_color)
+    cv2.imshow("Canny", canny)
+# cv2.imshow("contornos", imagen)
+# cv2.imshow("contornos", imagen)
+
+    key = cv2.waitKey(100)
+    if key == 27:
+        break
+
+cv2.destroyAllWindows()
