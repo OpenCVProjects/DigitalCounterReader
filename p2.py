@@ -8,18 +8,15 @@ captura_color = cv2.imread('./capturas/capturas_1.jpg')
 resized_captura_color = cv2.resize(captura_color, (captura_color.shape[1]/2, captura_color.shape[0]/2))
 
 cv2.namedWindow("normal")
-cv2.createTrackbar("Threshold value", "normal", 30, 255, nothing)
-cv2.createTrackbar("Max", "normal", 100, 225, nothing)
+cv2.createTrackbar("Threshold value", "normal", 46, 255, nothing)
+cv2.createTrackbar("Max", "normal", 110, 225, nothing)
 
 captura_gray = cv2.cvtColor(resized_captura_color, cv2.COLOR_BGR2GRAY)
-
-
 
 # imagen, contornos, jerarquia = cv2.findContours(dst.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
 # i=0
 while True:
-
 
     value_threshold = cv2.getTrackbarPos("Threshold value", "normal")
     max = cv2.getTrackbarPos("Max", "normal")
@@ -29,7 +26,7 @@ while True:
 
     # imagen, contornos, jerarquia = cv2.findContours(canny.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
-    (_, contornos,_) = cv2.findContours(canny.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    (_, contornos,_) = cv2.findContours(canny.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
     # Mostramos el numero de monedas por consola
     print("He encontrado {} objetos".format(len(contornos)))
@@ -39,12 +36,12 @@ while True:
 
     i = 0
     for contorno in contornos:
-        if cv2.contourArea(contorno) > 100 and cv2.contourArea(contorno) < 1500:
-            approx = cv2.approxPolyDP(contorno,0.06*cv2.arcLength(contorno,True),True)
-            if len(approx)==4:
-                print(2)
-                (x,y,w,h) = cv2.boundingRect(contorno)
-                cv2.rectangle(resized_captura_color, (x,y), (x+w, y+h), (0, 255, 0), 3 )
+        # if cv2.contourArea(contorno) > 10 and cv2.contourArea(contorno) < 100000:
+            # approx = cv2.approxPolyDP(contorno,0.03*cv2.arcLength(contorno,True),True)
+            # if len(approx)==4:
+                # print(2)
+        (x,y,w,h) = cv2.boundingRect(contorno)
+        cv2.rectangle(resized_captura_color, (x,y), (x+w, y+h), (0, 255, 0), 3 )
         # (x, y, w, h) = cv2.boundingRect(contorno)
         #     cv2.rectangle(resized_captura_color, (x, y), (x+w, y+h), (0,255,0), 3)
         # cv2.putText(resized_captura_color, str(i), (x - 10, y - 10),
