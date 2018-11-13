@@ -1,0 +1,4 @@
+Resultados de la lectura:./capturas\capturas_0.jpg
+274.2
+239.7
+795.3

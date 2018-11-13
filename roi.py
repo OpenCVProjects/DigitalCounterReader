@@ -7,80 +7,93 @@ import glob
 
 methods = ['cv2.TM_CCOEFF_NORMED', 'cv2.TM_CCORR_NORMED', 'cv2.TM_SQDIFF_NORMED']
 
-# captura = cv2.imread('./capturas/capturas_1.jpg')
-#
-# # template = cv2.imread('./templates/2.png', 0)
-#
-# roi = captura[556:710, 1025:1440]
-#
-# n1 = roi[19:135, 16:92]
-# n2 = roi[19:135, 116:192]
-# n3 = roi[19:135, 216:292]
-# n4 = roi[19:135, 316:392]
-#
-# numeros = ['n1', 'n2', 'n3', 'n4']
-
-# n1_gray = cv2.cvtColor(n2, cv2.COLOR_BGR2GRAY)
-# cv2.imshow("n1", n1_gray)
-
 templates = glob.glob("./templates/*.png")
 capturas = glob.glob("./capturas/*.jpg")
 
+f = open ('resultados.txt','w')
+d = open('metodos.txt', 'w')
+
 for captura in capturas:
-    # capt = eval(captura)
-
+    f.write('Resultados de la lectura:')
+    f.write(captura)
+    f.write('\n')
     capturada = cv2.imread(captura)
-    print(captura)
 
-    # template = cv2.imread('./templates/2.png', 0)
+    s1 = capturada[556:710, 1025:1440]
+    s2 = capturada[837:1003, 1025:1440]
+    s3 = capturada[1130:1300, 1025:1440]
 
-    roi = capturada[556:710, 1025:1440]
+    secciones =  ['s1' , 's2', 's3']
 
-    n1 = roi[19:135, 16:92]
-    n2 = roi[19:135, 116:192]
-    n3 = roi[19:135, 216:292]
-    n4 = roi[19:135, 316:392]
+    for seccion in secciones:
+        resultado = 0
 
-    numeros = ['n1', 'n2', 'n3', 'n4']
+        roi = eval(seccion)
 
-    for numero in numeros:
-        num = eval(numero)
-        num_gray = cv2.cvtColor(num, cv2.COLOR_BGR2GRAY)
-        # cv2.imshow(capt, n1_gray)
+        n1 = roi[19:140, 16:92]
+        n2 = roi[19:140, 116:192]
+        n3 = roi[19:140, 216:292]
+        n4 = roi[19:140, 316:392]
 
-        im = 0
-        valor = 0
-        mas_mejor = 0
-        indice_final = 0
-        indice = 0
-        for templateImage in templates:
-            template = cv2.imread(templateImage, 0)
-            # cv2.imshow("Template_" + str(im), template)
-            mejor = 0
-            # print("Template Numero: ", im)
-            im = im + 1
-            for meth in methods:
-                method = eval(meth)
+        numeros = ['n1', 'n2', 'n3', 'n4']
 
-                # Apply template Matching
-                res = cv2.matchTemplate(num_gray,template,method)
-                min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+        for numero in numeros:
+            num = eval(numero)
+            num_gray = cv2.cvtColor(num, cv2.COLOR_BGR2GRAY)
 
-                # print("Metodo: ", meth)
-                # print("Min Val:", min_val)
-                # print("Max Val:", max_val)
+            im = 0
+            valor = 0
+            mas_mejor = 0
+            indice_final = 0
+            indice = 0
+            for templateImage in templates:
+                template = cv2.imread(templateImage, 0)
+                mejor = 0
+                im = im + 1
+                d.write("numero")
+                d.write('\t')
+                d.write(templateImage)
+                d.write('\n')
+                for meth in methods:
+                    method = eval(meth)
 
-                if max_val > mejor:
-                    mejor = max_val
-                    valor = indice
-                    # print("nuevo mejor ", mejor,  meth)
+                    # Apply template Matching
+                    res = cv2.matchTemplate(num_gray,template,method)
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 
-            if mejor > mas_mejor:
-                mas_mejor = mejor
-                indice_final = valor
+                    print(meth, min_val, max_val)
 
-            indice = indice + 1
+                    d.write(meth)
+                    d.write('\t')
+                    d.write(str(min_val))
+                    d.write('\t')
+                    d.write(str(max_val))
+                    d.write('\n')
 
-        print ("El numero es", indice_final)
+                    if max_val > mejor:
+                        mejor = max_val
+                        valor = indice
 
-cv2.waitKey(0)
+                if mejor > mas_mejor:
+                    mas_mejor = mejor
+                    indice_final = valor
+
+                indice = indice + 1
+
+            if numero == 'n1':
+                resultado = resultado + indice_final * 100
+
+            if numero == 'n2':
+                resultado = resultado + indice_final * 10
+
+            if numero == 'n3':
+                resultado = resultado + indice_final
+
+            if numero == 'n4':
+                resultado = resultado + (indice_final * 0.1)
+
+        f.write(str(resultado))
+        f.write('\n')
+
+f.close()
+d.close()
